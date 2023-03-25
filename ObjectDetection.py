@@ -55,7 +55,7 @@ class ObjectDetection:
         bboxes = []
         for i in range(detections.size(1)):
             j = 0
-            while detections[0, i, j, 0] >= 0.1:
+            while detections[0, i, j, 0] >= 0.25:
                 pt = (detections[0, i, j, 1:] * scale).cpu().numpy()
                 if (len(pt)) > 0:
                     t_l = pt[0], pt[1]
