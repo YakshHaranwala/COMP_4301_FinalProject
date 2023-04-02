@@ -58,21 +58,22 @@ class DistanceCalculator:
 
             # stack the reference coordinates and the object coordinates
             # to include the object center
-            refCoords = np.vstack([refObj[0], (refObj[1][0], refObj[1][1])])
-            objCoords = np.vstack([box, (cX, cY)])
+            refCoords = np.vstack([refObj[0][1], refObj[0][2]])
+            objCoords = np.vstack([box[0], box[3]])
 
         # loop over the original points
         for ((xA, yA), (xB, yB), color) in zip(refCoords, objCoords, colors):
+            # compute the Euclidean distance between the coordinates,
+            # and then convert the distance in pixels to distance in
+            # units
+            D = dist.euclidean((xA, yA), (xB, yB)) / refObj[2]
+
             # draw circles corresponding to the current points and
             # connect them with a line
             cv.circle(orig, (int(xA), int(yA)), 5, color, -1)
             cv.circle(orig, (int(xB), int(yB)), 5, color, -1)
             cv.line(orig, (int(xA), int(yA)), (int(xB), int(yB)),
                     color, 2)
-            # compute the Euclidean distance between the coordinates,
-            # and then convert the distance in pixels to distance in
-            # units
-            D = dist.euclidean((xA, yA), (xB, yB)) / refObj[2]
             (mX, mY) = self.midpoint((xA, yA), (xB, yB))
             cv.putText(orig, "{:.1f}in".format(D), (int(mX), int(mY - 10)),
                        cv.FONT_HERSHEY_SIMPLEX, 0.55, color, 2)

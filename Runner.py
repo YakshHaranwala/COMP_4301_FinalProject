@@ -33,7 +33,7 @@ if __name__ == '__main__':
             break
 
         # Display the frame
-        frame, bboxes = detector.detect_objects(frame)
+        bboxes = detector.detect_objects(frame)
         frame = distance.calculate_distances(frame, bboxes, 36)
         cv.imshow("Live Prediction", frame)
 
