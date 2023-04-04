@@ -6,40 +6,53 @@
 
     @author: Yaksh J Haranwala
 """
-import cv2 as cv
+# Credits to give: https://github.com/jaimin-k/Monocular-Depth-Estimation-using-MiDaS/blob/main/MiDaS%20Depth%20Sensing.ipynb
+# MiDaS: https://pytorch.org/hub/intelisl_midas_v2/
+
+import cv2
+import requests
+import imutils
+import numpy as np
 from ObjectDetection import ObjectDetection
-from DistanceCalculator import DistanceCalculator
+from DepthCalculator import MidasDepth
+
 
 if __name__ == '__main__':
     detector = ObjectDetection()
-    distance = DistanceCalculator()
+    depthCalculator = MidasDepth("MiDaS_small")
 
+    url = "http://192.168.2.93:8080/shot.jpg"
     # Start the video capture.
-    cap = cv.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
 
     # Check if the camera is opened successfully
-    if not cap.isOpened():
-        print("Error opening video capture.")
+    # if not cap.isOpened():
+    #     print("Error opening video capture.")
 
     # While the video capture is on, detect the objects and
     # provide guidance to the object.
     while True:
         # grab next frame
-        ret, frame = cap.read()
+        # ret, frame = cap.read()
+        img_resp = requests.get(url)
+        img_arr = np.array(bytearray(img_resp.content), dtype=np.uint8)
+        img = cv2.imdecode(img_arr, -1)
+        frame = imutils.resize(img, width=640, height=640)
 
         # Check if the frame was read successfully
-        if not ret:
-            print("Error reading frame from video stream.")
-            break
+        # if not ret:
+        #     print("Error reading frame from video stream.")
+        #     break
 
         # Display the frame
-        bboxes = detector.detect_objects(frame)
-        frame = distance.calculate_distances(frame, bboxes, 36)
-        cv.imshow("Live Prediction", frame)
+        output = depthCalculator.calculate_depth(frame)
+        detector.detect_objects(frame, output)
+
+        cv2.imshow("Live Prediction", frame)
 
         # Exit if the 'q' key is pressed
-        if cv.waitKey(1) == ord('q'):
+        if cv2.waitKey(1) == ord('q'):
             break
 
-    cap.release()
-    cv.destroyAllWindows()
+    # cap.release()
+    cv2.destroyAllWindows()
