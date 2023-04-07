@@ -6,8 +6,9 @@
 
     @author: Yaksh J Haranwala
 """
-# Credits to give: https://github.com/jaimin-k/Monocular-Depth-Estimation-using-MiDaS/blob/main/MiDaS%20Depth%20Sensing.ipynb
+# Credits: https://github.com/jaimin-k/Monocular-Depth-Estimation-using-MiDaS/blob/main/MiDaS%20Depth%20Sensing.ipynb
 # MiDaS: https://pytorch.org/hub/intelisl_midas_v2/
+# YoloV8: https://github.com/ultralytics/ultralytics
 
 import cv2
 import requests
@@ -48,6 +49,10 @@ if __name__ == '__main__':
         output = depthCalculator.calculate_depth(frame)
         detector.detect_objects(frame, output)
 
+        depth_map = cv2.normalize(output, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+        depth_map = (depth_map * 255).astype(np.uint8)
+        depth_map = cv2.applyColorMap(depth_map, cv2.COLORMAP_MAGMA)
+        cv2.imshow("Live Depth Map", depth_map)
         cv2.imshow("Live Prediction", frame)
 
         # Exit if the 'q' key is pressed

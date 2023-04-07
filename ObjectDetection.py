@@ -44,12 +44,14 @@ class ObjectDetection:
             boxes = r.boxes
             for box in boxes:
                 b_box = np.array(box.xyxy[0].cpu()).astype(np.int16)
-                depth_box = depth_array[b_box[1]:b_box[3], b_box[0]:b_box[2]]
+                depth_box = depth_array[(b_box[1]+b_box[3])//2, (b_box[0]+b_box[2])//2]
                 threshold = np.average(depth_box) / 1000
-                if threshold < 0.25:
-                    annotator.box_label(b_box, f"far")
+
+                if threshold < 0.35:
+                    annotator.box_label(b_box, f"far {threshold}")
                 else:
                     annotator.box_label(b_box, f"near")
                     cv.putText(frame, f'Dur reh lavde', (int(b_box[0]), int(b_box[3] - 25)),
                                cv.FONT_HERSHEY_PLAIN, 2, (0, 255, 25), 2)
+
 
