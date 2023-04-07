@@ -37,7 +37,7 @@ class ObjectDetection:
 
         # Used to draw bounding boxes on the detected objects.
         annotator = Annotator(frame)
-
+        
         # These are the bounding boxes that we will pass to the distance calculator.
         bounding_boxes = []
         for r in results:
@@ -53,5 +53,14 @@ class ObjectDetection:
                     annotator.box_label(b_box, f"near")
                     cv.putText(frame, f'Dur reh lavde', (int(b_box[0]), int(b_box[3] - 25)),
                                cv.FONT_HERSHEY_PLAIN, 2, (0, 255, 25), 2)
+        
+    def draw_roi(self, frame):
+        rows, cols = frame.shape[:2]
+        bottom_left  = [int(cols*0.20), int(rows*0.95)]
+        top_left     = [int(cols*0.20), int(rows*0.20)]
+        bottom_right = [int(cols*0.80), int(rows*0.95)]
+        top_right    = [int(cols*0.80), int(rows*0.20)]
+        vertices = np.array([[bottom_left, top_left, top_right, bottom_right]], dtype=np.int32)
+        cv.rectangle(frame,top_left, bottom_right, (0,0,255), 5)
 
 

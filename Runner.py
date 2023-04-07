@@ -22,7 +22,7 @@ if __name__ == '__main__':
     detector = ObjectDetection()
     depthCalculator = MidasDepth("MiDaS_small")
 
-    url = "http://192.168.2.93:8080/shot.jpg"
+    url = "http://192.168.2.56:8080/shot.jpg"
     # Start the video capture.
     # cap = cv2.VideoCapture(0)
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         # Display the frame
         output = depthCalculator.calculate_depth(frame)
         detector.detect_objects(frame, output)
-
+        detector.draw_roi(frame)
         depth_map = cv2.normalize(output, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
         depth_map = (depth_map * 255).astype(np.uint8)
         depth_map = cv2.applyColorMap(depth_map, cv2.COLORMAP_MAGMA)
