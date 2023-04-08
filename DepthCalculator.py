@@ -7,12 +7,11 @@
 """
 import torch
 import numpy as np
-import cv2 as cv
+import cv2 as cv2
 
 
 class MidasDepth:
     def __init__(self, model_type):
-        self.model_type = "MiDaS_small"
         self.midas = torch.hub.load("intel-isl/MiDaS", model_type)
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.midas.to(self.device)
@@ -24,7 +23,23 @@ class MidasDepth:
             self.transform = midas_transforms.small_transform
 
     def calculate_depth(self, frame):
-        frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        """
+            Using the MiDaS model, estimate the inverse depth of the current frame.
+
+            Parameters
+            ----------
+                frame: np.ndarray
+                    The frame of which the depth map is to be calculated.
+
+            Returns
+            -------
+                np.ndarray:
+                    The actual depth map values.
+                np.ndarray:
+                    The same depth map but modified to display.
+        """
+        # Convert to RGB since opencv uses the BGR format and torch uses RGB.
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         input_batch = self.transform(frame).to(self.device)
 
         with torch.no_grad():
@@ -39,4 +54,8 @@ class MidasDepth:
 
         output = prediction.cpu().numpy()
 
-        return output
+        depth_map = cv2.normalize(output, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+        depth_map = (depth_map * 255).astype(np.uint8)
+        depth_map = cv2.applyColorMap(depth_map, cv2.COLORMAP_MAGMA)
+
+        return output, depth_map

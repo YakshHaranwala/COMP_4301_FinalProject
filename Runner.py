@@ -23,42 +23,60 @@ if __name__ == '__main__':
     detector = ObjectDetection()
     depthCalculator = MidasDepth("MiDaS_small")
 
-    url = "http://192.168.2.76:8080/shot.jpg"
-    # Start the video capture.
-    # cap = cv2.VideoCapture(0)
+    try:
+        url = "http://192.168.2.93:8080/shot.jpg"
 
-    # Check if the camera is opened successfully
-    # if not cap.isOpened():
-    #     print("Error opening video capture.")
+        # While the video capture is on, detect the objects and
+        # provide guidance to the object.
+        while True:
+            # grab next frame
+            img_resp = requests.get(url)
+            img_arr = np.array(bytearray(img_resp.content), dtype=np.uint8)
+            frame = cv2.imdecode(img_arr, -1)
 
-    # While the video capture is on, detect the objects and
-    # provide guidance to the object.
-    while True:
-        # grab next frame
-        # ret, frame = cap.read()
-        img_resp = requests.get(url)
-        img_arr = np.array(bytearray(img_resp.content), dtype=np.uint8)
-        img = cv2.imdecode(img_arr, -1)
-        frame = imutils.resize(img, width=640, height=640)
+            # Calculate the depth, detect the objects and provide guidance.
+            inv_depth, disp_depth_map = depthCalculator.calculate_depth(frame)
+            detector.detect_objects(frame, inv_depth)
 
-        # Check if the frame was read successfully
-        # if not ret:
-        #     print("Error reading frame from video stream.")
-        #     break
+            # Display the depth map and the guidance frame.
+            cv2.imshow("Live Depth Map", disp_depth_map)
+            cv2.imshow("Live Prediction", frame)
 
-        # Display the frame
-        output = depthCalculator.calculate_depth(frame)
-        detector.detect_objects(frame, output)
+            # Exit if the 'q' key is pressed
+            if cv2.waitKey(1) == ord('q'):
+                break
 
-        depth_map = cv2.normalize(output, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
-        depth_map = (depth_map * 255).astype(np.uint8)
-        depth_map = cv2.applyColorMap(depth_map, cv2.COLORMAP_MAGMA)
-        cv2.imshow("Live Depth Map", depth_map)
-        cv2.imshow("Live Prediction", frame)
+        cv2.destroyAllWindows()
 
-        # Exit if the 'q' key is pressed
-        if cv2.waitKey(1) == ord('q'):
-            break
+    except:
+        print("Could not find phone camera, using device webcam instead.")
+        # Start the video capture.
+        cap = cv2.VideoCapture(0)
 
-    # cap.release()
-    cv2.destroyAllWindows()
+        # Check if the camera is opened successfully
+        if not cap.isOpened():
+            print("Error opening video capture.")
+
+        while True:
+            # grab next frame
+            ret, frame = cap.read()
+
+            # Check if the frame was read successfully
+            if not ret:
+                print("Error reading frame from video stream.")
+                break
+
+            # Calculate the depth, detect the objects and provide guidance.
+            inv_depth, disp_depth_map = depthCalculator.calculate_depth(frame)
+            detector.detect_objects(frame, inv_depth)
+
+            # Display the depth map and the guidance frame.
+            cv2.imshow("Live Depth Map", disp_depth_map)
+            cv2.imshow("Live Prediction", frame)
+
+            # Exit if the 'q' key is pressed
+            if cv2.waitKey(1) == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
