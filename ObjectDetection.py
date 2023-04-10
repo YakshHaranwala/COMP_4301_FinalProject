@@ -3,7 +3,7 @@
     frame. The frame can be either a video or an image.
     Credits: https://github.com/ultralytics/ultralytics
 
-    @author: Yaksh J Haranwala, Abdul Shaji, Salman Haidri, Mohammad Shoaib
+    @author: Yaksh J Haranwala, Abdul Shaji, Salman Haidri, Mohammed Shoaib
 """
 import warnings
 

@@ -24,7 +24,7 @@ if __name__ == '__main__':
     depthCalculator = MidasDepth("MiDaS_small")
 
     try:
-        url = "http://192.168.2.93:8080/shot.jpg"
+        url = "http://172.20.10.11:8080/shot.jpg"
 
         # While the video capture is on, detect the objects and
         # provide guidance to the object.
